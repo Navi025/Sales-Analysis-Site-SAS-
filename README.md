@@ -34,7 +34,7 @@ Ensure you have **Node.js** and **npm** installed on your system.
 ### Installation
 1. **Clone the repository**:
    ```sh
-   git clone https://github.com/your-username/sales-analysis-site.git
+   git clone https://github.com/Navi025/Sales-Analysis-Site-SAS-.git
    cd sales-analysis-site
    ```
 2. **Install dependencies**:
@@ -61,7 +61,7 @@ Contributions are welcome! 🎉 If you'd like to contribute:
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
 
 ## Author
-- **[Your Name]** - Developer & Maintainer
+- **Navnitya Vinayak** - Developer & Maintainer
 
 ## Acknowledgments
 - Special thanks to **open-source contributors** and **libraries** used in this project.
