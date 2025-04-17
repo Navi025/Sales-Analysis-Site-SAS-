@@ -1,91 +1,100 @@
 
-import io
-import base64
-from matplotlib.backends.backend_agg import FigureCanvasAgg
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-
-# df = pd.read_csv("Filtered_DataSet")
-
-
+import plotly
+import plotly.express as px
+import json
 
 
 def Analyse(df):
     df["Quantity_Ordered"] = df["Quantity_Ordered"].astype("float")
     df["Price_Each"] = df["Price_Each"].astype("float")
     df["Order_ID"] = df["Order_ID"].astype("int")
-    MonthWise = Find_MonthWise(df)
+    MonthWise, month_explanation = Find_MonthWise(df)
     
-    ProductWise = Find_ProductWise(df)
+    ProductWise, product_explanation = Find_ProductWise(df)
     
-    CityWise = Find_CityWise(df)
+    CityWise, city_explanation = Find_CityWise(df)
     
-    TimeWise = Find_TimeWise(df)
+    TimeWise, time_explanation = Find_TimeWise(df)
     
-    Final = {'Month':MonthWise,'Product':ProductWise,'City':CityWise,'Time':TimeWise}
+    Forecast, forecast_explanation = Sales_Forecast(df)
+    
+    Final = {
+        'Month': {'graph': MonthWise, 'explanation': month_explanation},
+        'Product': {'graph': ProductWise, 'explanation': product_explanation},
+        'City': {'graph': CityWise, 'explanation': city_explanation},
+        'Time': {'graph': TimeWise, 'explanation': time_explanation},
+        'Forecast': {'graph': Forecast, 'explanation': forecast_explanation}
+    }
     return Final
+
+
+def Find_TimeWise(df):
+    list_time = []
+
+    for i in df['Order_Date']:
+        list_time.append(i.split(" ")[1])  # separating date and time component
+    df['Time'] = list_time
+
+    df_Time = df.groupby(['Time'])['Total_Price'].sum().reset_index()
+    df_Time_top10 = df_Time.sort_values('Total_Price', ascending=False).head(10)
+
+    fig = px.bar(df_Time_top10, x='Time', y='Total_Price',
+                 title='Top 10 Time Slots by Sales',
+                 labels={'Time': 'Time of Day', 'Total_Price': 'Total Sales ($)'},
+                 text='Total_Price')
+    fig.update_traces(texttemplate='%{text:.2s}', textposition='outside')
+    fig.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
+
+    graph_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    explanation = "This bar chart shows the top 10 time slots with the highest sales. It helps identify peak sales hours."
+
+    return graph_json, explanation
 
 
 def Find_MonthWise(df):
     df["Total_Price"] = df["Quantity_Ordered"] * df["Price_Each"]
 
-    df_Total_Price = df.groupby(['month'])['Total_Price'].sum().sort_values(ascending=False)
-    df_Total_Price = df_Total_Price.to_frame()
-
-    df_Total_Price = df_Total_Price.reset_index()
-
+    df_Total_Price = df.groupby(['month'])['Total_Price'].sum().reset_index()
 
     month_order = ["jan", "feb", "mar", "apr", "may", "june", "july", "aug", "sep", "oct", "nov", "dec"]
     df_Total_Price['month'] = pd.Categorical(df_Total_Price['month'], categories=month_order, ordered=True)
     df_Total_Price = df_Total_Price.sort_values('month')
-    df_Total_Price = df_Total_Price.reset_index(drop=True)
 
-    a4_dims = (11.7, 8.27)
-    fig, ax = plt.subplots(figsize=a4_dims)
+    fig = px.bar(df_Total_Price, x='month', y='Total_Price', title='Month wise Sales',
+                 labels={'month': 'Month', 'Total_Price': 'Total Sales ($)'},
+                 text='Total_Price')
+    fig.update_traces(texttemplate='%{text:.2s}', textposition='outside')
+    fig.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
 
-    sns.barplot(x = "Total_Price",
-                y = "month",
-                data =df_Total_Price )
-    plt.title("Month wise Sale")
-    canvas = FigureCanvasAgg(fig)
-    buf = io.BytesIO()
-    canvas.print_png(buf)
-    plt.close(fig)
-    buf.seek(0)
+    graph_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    # Convert the image to a base64-encoded string
-    image_Month= base64.b64encode(buf.read()).decode("utf-8")
-    return image_Month
+    explanation = "This bar chart shows total sales for each month. It helps identify the best and worst performing months."
+
+    return graph_json, explanation
 # 2nd Question
 
 def Find_CityWise(df):
     list_city = []
     for i in df['Purchase_Address']:
-        list_city.append(i.split(",")[1])
+        list_city.append(i.split(",")[1].strip())
     df['City'] = list_city
 
-    df_City=df.groupby(["City"])['Total_Price'].sum().sort_values(ascending=False)
-    df_City=df_City.to_frame()
-    df_City.reset_index(inplace=True)
+    df_City = df.groupby(["City"])['Total_Price'].sum().reset_index()
 
+    fig = px.bar(df_City.sort_values('Total_Price', ascending=False), x='City', y='Total_Price',
+                 title='City wise Sales',
+                 labels={'City': 'City', 'Total_Price': 'Total Sales ($)'},
+                 text='Total_Price')
+    fig.update_traces(texttemplate='%{text:.2s}', textposition='outside')
+    fig.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
 
-    a4_dims = (11.7, 8.27)
-    fig, ax = plt.subplots(figsize=a4_dims)
-    sns.barplot(x = "Total_Price",
-                y = "City",
-                data = df_City)
-    plt.title("City wise Sales")
-    canvas = FigureCanvasAgg(fig)
-    buf = io.BytesIO()
-    canvas.print_png(buf)
-    plt.close(fig)
-    buf.seek(0)
+    graph_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    # Convert the image to a base64-encoded string
-    image_City = base64.b64encode(buf.read()).decode("utf-8")
-    return image_City
+    explanation = "This bar chart shows total sales for each city. It helps identify the cities with the highest sales."
+
+    return graph_json, explanation
     
     
     
@@ -94,58 +103,54 @@ def Find_CityWise(df):
 # 3rd Question
 
 def Find_ProductWise(df):
+    df_Product = df.groupby(['Product'])['Quantity_Ordered'].sum().reset_index()
+    df_Product = df_Product.rename(columns={'Quantity_Ordered': 'Total_Quantity'})
 
-    df_Product=df.groupby(['Product'])['Quantity_Ordered'].sum().sort_values(ascending=False)
-    df_Product=df_Product.to_frame()
-    df_Product = df_Product.reset_index().rename(columns={'Quantity_Ordered': 'Total_Quantity'})
+    fig = px.bar(df_Product.sort_values('Total_Quantity', ascending=False), x='Product', y='Total_Quantity',
+                 title='Product and Total Quantity Sold',
+                 labels={'Product': 'Product', 'Total_Quantity': 'Total Quantity Sold'},
+                 text='Total_Quantity')
+    fig.update_traces(texttemplate='%{text:.2s}', textposition='outside')
+    fig.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
 
-    a4_dims = (11.7, 8.27)
-    fig, ax = plt.subplots(figsize=a4_dims)
-    sns.barplot(x = "Total_Quantity",
-                y = "Product",
-                data = df_Product)
-    plt.title("Prouct and Total_Quantity")
+    graph_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    canvas = FigureCanvasAgg(fig)
-    buf = io.BytesIO()
-    canvas.print_png(buf)
-    plt.close(fig)
-    buf.seek(0)
+    explanation = "This bar chart shows the total quantity sold for each product. It helps identify the best-selling products."
 
-    # Convert the image to a base64-encoded string
-    image_Product = base64.b64encode(buf.read()).decode("utf-8")
-    return image_Product
+    return graph_json, explanation
 
 #  4th Question
 
 
-def Find_TimeWise(df):
-    list_time = []
+from prophet import Prophet
 
-    for i in df['Order_Date']:
-        list_time.append(i.split(" ")[1]) #seperating date and time component
-    df['Time'] = list_time
+def Sales_Forecast(df):
+    # Prepare data for Prophet: aggregate monthly sales
+    df["Total_Price"] = df["Quantity_Ordered"] * df["Price_Each"]
+    df_monthly = df.groupby('month')['Total_Price'].sum().reset_index()
 
-    df_Time=df.groupby(['Time'])['Total_Price'].sum().sort_values(ascending=False)
-    df_Time=df_Time.to_frame()
-    df_Time = df_Time.reset_index()
+    # Map month names to numbers for sorting and forecasting
+    month_map = {"jan":1, "feb":2, "mar":3, "apr":4, "may":5, "june":6, "july":7, "aug":8, "sep":9, "oct":10, "nov":11, "dec":12}
+    df_monthly['month_num'] = df_monthly['month'].map(month_map)
+    df_monthly = df_monthly.dropna(subset=['month_num'])
+    df_monthly = df_monthly.sort_values('month_num')
 
-    df_Time_top10 = df_Time.head(10)
+    # Create dataframe for Prophet with ds and y columns
+    # Use first day of each month as date
+    df_monthly['ds'] = pd.to_datetime(df_monthly['month_num'].astype(int).astype(str) + '-01-2023', format='%m-%d-%Y')
+    df_monthly['y'] = df_monthly['Total_Price']
 
+    model = Prophet(yearly_seasonality=True, daily_seasonality=False, weekly_seasonality=False)
+    model.fit(df_monthly[['ds', 'y']])
 
-    a4_dims = (11.7, 8.27)
-    fig, ax = plt.subplots(figsize=a4_dims)
-    sns.barplot(x = "Total_Price",
-                y = "Time",
-                data = df_Time_top10)
-    plt.title("Time vs Sales")
+    future = model.make_future_dataframe(periods=6, freq='M')  # forecast next 6 months
+    forecast = model.predict(future)
 
-    canvas = FigureCanvasAgg(fig)
-    buf = io.BytesIO()
-    canvas.print_png(buf)
-    plt.close(fig)
-    buf.seek(0)
+    # Prepare forecast plot
+    fig = px.line(forecast, x='ds', y='yhat', title='Sales Forecast for Next 6 Months',
+                  labels={'ds': 'Date', 'yhat': 'Predicted Sales ($)'})
+    graph_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    # Convert the image to a base64-encoded string
-    image_Time = base64.b64encode(buf.read()).decode("utf-8")
-    return image_Time
+    explanation = "This line chart shows the forecasted sales for the next 6 months based on historical data."
+
+    return graph_json, explanation
