@@ -1,0 +1,10 @@
+flask
+flask-cors
+pandas
+matplotlib
+seaborn
+numpy
+scikit-learn
+statsmodels
+prophet
+plotly

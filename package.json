@@ -1,7 +1,8 @@
 {
-  "name": "analysis",
-  "version": "0.1.0",
+  "name": "sales-analysis-site",
+  "version": "2.1.1",
   "private": true,
+  "author": "Navnitya Vinayak",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,9 +10,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "next": "14.0.3",
+    "plotly.js": "^3.0.1",
     "react": "^18",
     "react-dom": "^18",
-    "next": "14.0.3"
+    "react-plotly.js": "^2.6.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.0.1",
