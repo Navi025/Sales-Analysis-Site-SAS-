@@ -270,6 +270,10 @@ const StartAnalysisPage = () => {
           </div>
         )}
       </main>
+       {/* Footer */}
+       <footer className="bg-red-900 text-white text-center py-2">
+        &copy; {new Date().getFullYear()} Navnitya Vinayak. All rights reserved.
+      </footer>
     </div>
   )
 }
