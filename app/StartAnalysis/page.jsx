@@ -1,9 +1,10 @@
-import StartAnalysisPage from "components/StartAnalysisPage"
-// import StartAnalysisPage from "@/components/StartAnalysisPage"
+import StartAnalysisPage from "components/StartAnalysisPage";
+
+
 const StartAnalysis = () => {
-  return (
-    <StartAnalysisPage />
-  )
+    return (
+        <StartAnalysisPage />
+    )
 }
 
-export default StartAnalysis
+export default StartAnalysis;

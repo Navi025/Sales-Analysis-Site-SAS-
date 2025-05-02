@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useState, useEffect } from "react"
+import dynamic from 'next/dynamic';
+const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 import logo from "public/assets/logo.jpg"
 import img1 from "public/assets/01.jpg"
 import img2 from "public/assets/02.jpg"
@@ -15,12 +17,32 @@ const images = [img1, img2, img3, img4, img5]
 const HomePage = () => {
   const router = useRouter();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [graphs, setGraphs] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length)
     }, 3000); // change image every 3 seconds
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    // Fetch demo dataset analysis for graphs
+    const fetchDemoGraphs = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/analyse-demo');
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        setGraphs(data);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    fetchDemoGraphs();
   }, []);
 
   return (
@@ -109,21 +131,48 @@ const HomePage = () => {
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           <section className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4 text-red-700">Monthly Sales</h2>
-            <div className="h-48 bg-gray-200 rounded-md flex items-center justify-center text-gray-500">
-              Chart Placeholder
-            </div>
+            {graphs ? (
+              <Plot
+                data={JSON.parse(graphs.Month.graph).data}
+                layout={JSON.parse(graphs.Month.graph).layout}
+                style={{ width: '100%', height: '300px' }}
+                config={{ displayModeBar: false }}
+              />
+            ) : (
+              <div className="h-48 bg-gray-200 rounded-md flex items-center justify-center text-gray-500">
+                Loading...
+              </div>
+            )}
           </section>
           <section className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4 text-red-700">Product Sales</h2>
-            <div className="h-48 bg-gray-200 rounded-md flex items-center justify-center text-gray-500">
-              Chart Placeholder
-            </div>
+            {graphs ? (
+              <Plot
+                data={JSON.parse(graphs.Product.graph).data}
+                layout={JSON.parse(graphs.Product.graph).layout}
+                style={{ width: '100%', height: '300px' }}
+                config={{ displayModeBar: false }}
+              />
+            ) : (
+              <div className="h-48 bg-gray-200 rounded-md flex items-center justify-center text-gray-500">
+                Loading...
+              </div>
+            )}
           </section>
           <section className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4 text-red-700">City Sales</h2>
-            <div className="h-48 bg-gray-200 rounded-md flex items-center justify-center text-gray-500">
-              Chart Placeholder
-            </div>
+            {graphs ? (
+              <Plot
+                data={JSON.parse(graphs.City.graph).data}
+                layout={JSON.parse(graphs.City.graph).layout}
+                style={{ width: '100%', height: '300px' }}
+                config={{ displayModeBar: false }}
+              />
+            ) : (
+              <div className="h-48 bg-gray-200 rounded-md flex items-center justify-center text-gray-500">
+                Loading...
+              </div>
+            )}
           </section>
         </div>
       </main>

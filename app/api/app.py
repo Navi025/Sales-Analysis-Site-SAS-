@@ -33,14 +33,24 @@ def upload_file():
             df = pd.read_csv(file_path)
             print(f"Dataframe columns before rename: {df.columns.tolist()}")
             # Rename columns to match expected names in SalesAnalysis.py
-            df.rename(columns={
+            rename_dict = {
                 'Quantity Ordered': 'Quantity_Ordered',
                 'Price Each': 'Price_Each',
                 'Order ID': 'Order_ID',
                 'Order Date': 'Order_Date',
                 'Purchase Address': 'Purchase_Address'
-            }, inplace=True)
+            }
+            df.rename(columns=rename_dict, inplace=True)
             print(f"Dataframe columns after rename: {df.columns.tolist()}")
+
+            # Check for required columns
+            required_columns = ['Order_ID', 'Product', 'Quantity_Ordered', 'Price_Each', 'Order_Date', 'Purchase_Address', 'month']
+            missing_columns = [col for col in required_columns if col not in df.columns]
+            if missing_columns:
+                error_msg = f"Missing required columns: {', '.join(missing_columns)}"
+                print(error_msg)
+                return jsonify({'error': error_msg})
+
             result = Analyse(df)
             return jsonify(result)
     except Exception as e:
