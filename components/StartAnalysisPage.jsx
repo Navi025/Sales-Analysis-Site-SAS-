@@ -166,7 +166,7 @@ const StartAnalysisPage = () => {
                 onClick={handleUseDemo}
                 disabled={clicked}
               >
-                Use Demo Data Set
+                Use Demo Data
               </button>
               <button
                 type="button"
@@ -174,7 +174,7 @@ const StartAnalysisPage = () => {
                 onClick={() => setShowDemo(true)}
                 disabled={clicked}
               >
-                View Demo Data Set
+                View Demo Data
               </button>
             </div>
           </div>
