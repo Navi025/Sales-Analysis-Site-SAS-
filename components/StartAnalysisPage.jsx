@@ -31,7 +31,7 @@ const StartAnalysisPage = () => {
       const formData = new FormData();
       formData.append('file', demoFileBlob, 'Filtered_DataSet.csv');
 
-      const response = await fetch('http://localhost:5000/api/analyse', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/analyse`, {
         method: 'POST',
         body: formData,
       });
@@ -60,7 +60,7 @@ const StartAnalysisPage = () => {
     const formData = new FormData();
     formData.append('file', selectedFile);
     try {
-      const response = await fetch('http://localhost:5000/api/analyse', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/analyse`, {
         method: 'POST',
         body: formData,
       });
