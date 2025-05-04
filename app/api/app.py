@@ -56,7 +56,21 @@ def upload_file():
     except Exception as e:
         return jsonify({'error': str(e)})
 
+@app.route('/api/reports', methods=['GET'])
+def get_reports():
+    # For demonstration, return a static list of reports
+    reports = [
+        {
+            "title": "Annual Sales Report 2023",
+            "description": "Summary of sales performance for the year 2023."
+        },
+        {
+            "title": "Q1 Sales Analysis",
+            "description": "Detailed analysis of sales in the first quarter."
+        }
+    ]
+    return jsonify(reports)
 
-  
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
